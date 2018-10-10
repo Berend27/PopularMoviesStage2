@@ -1,5 +1,6 @@
 package com.udacity.popularmovies;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -88,9 +89,17 @@ public class MoviePosters extends AppCompatActivity
         if (mToast != null)
             mToast.cancel();
 
+        /*
         String toastMessage = String.valueOf(clickedItemIndex);
         mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT);
         mToast.show();
+        */
+
+        Intent intent = new Intent(this, DetailsActivity.class);
+        intent.putExtra("key", "http://image.tmdb.org/t/p/w185//3IGbjc5ZC5yxim5W0sFING2kdcz.jpg");
+        intent.putExtra("json", mAdapter.getJson());
+        intent.putExtra("place", clickedItemIndex);
+        startActivity(intent);
     }
 
     @Override

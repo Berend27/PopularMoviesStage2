@@ -87,6 +87,12 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.PosterView
         posters = JsonUtils.getPoster(json);
     }
 
+    // getter method
+    String getJson()
+    {
+        return json;
+    }
+
     class PosterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         ImageView gridItemPosterView;
