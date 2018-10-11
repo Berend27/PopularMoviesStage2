@@ -1,11 +1,14 @@
 package com.udacity.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -16,6 +19,10 @@ import android.widget.SpinnerAdapter;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
+import static android.content.ContentValues.TAG;
+
+import java.net.URL;
+
 public class MoviePosters extends AppCompatActivity
         implements AdapterView.OnItemSelectedListener, PosterAdapter.PosterItemClickListener {
 
@@ -25,8 +32,19 @@ public class MoviePosters extends AppCompatActivity
     private PosterAdapter mAdapter;
     private RecyclerView mPosterGrid;
 
+    private String json = null;
+
+    static final String POPULAR = "http://api.themoviedb.org/3/movie/popular?api_key=";
+    static final String TOP_RATED = "http://api.themoviedb.org/3/movie/top_rated?api_key=";
+    static final String API_KEY = "9eae67985ee81a9b4780494317cc9229";    // Add your api key
+
+    //final Context appContext = getApplicationContext();
+
+    String query = TOP_RATED + API_KEY;    // starting value
+
     Toast mToast;
 
+    FetchMoviesTask fetch = new FetchMoviesTask();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,32 +92,42 @@ public class MoviePosters extends AppCompatActivity
          */
         mPosterGrid.setHasFixedSize(true);
 
+        fetch.execute(query);
+
         /*
          * The GreenAdapter is responsible for displaying each item in the list.
          */
-        mAdapter = new PosterAdapter(NUM_LIST_ITEMS, this);
+
+        mAdapter = new PosterAdapter(NUM_LIST_ITEMS, this, json);
+       // mToast = Toast.makeText(this, json , Toast.LENGTH_LONG);
+       // mToast.show();
+
 
         mPosterGrid.setAdapter(mAdapter);
 
     }
 
+
     @Override
     public void onListItemClicked(int clickedItemIndex) {
         // getting rid of old toast
+        /*
         if (mToast != null)
             mToast.cancel();
 
-        /*
+
         String toastMessage = String.valueOf(clickedItemIndex);
         mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT);
         mToast.show();
         */
+
 
         Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra("key", "http://image.tmdb.org/t/p/w185//3IGbjc5ZC5yxim5W0sFING2kdcz.jpg");
         intent.putExtra("json", mAdapter.getJson());
         intent.putExtra("place", clickedItemIndex);
         startActivity(intent);
+
     }
 
     @Override
@@ -108,8 +136,23 @@ public class MoviePosters extends AppCompatActivity
     {
         // An item was selected. You can retrieve the selected item using
         // parent.getItemAtPosition(pos)
-        Toast.makeText(parent.getContext(), parent.getItemAtPosition(pos).toString() , Toast.LENGTH_LONG).show();
-        mAdapter.selectCriteria(parent.getItemAtPosition(pos).toString());
+        String selection = parent.getItemAtPosition(pos).toString();
+        Toast.makeText(parent.getContext(), selection, Toast.LENGTH_LONG).show();
+        if (selection.equals("Most Popular"))
+            query = POPULAR + API_KEY;
+        else if (selection.equals("Top Rated"))
+            query = TOP_RATED + API_KEY;
+        new FetchMoviesTask().execute(query);
+
+        /*
+        mAdapter = new PosterAdapter(NUM_LIST_ITEMS, this, json);
+        mAdapter.setJson(json);
+        mPosterGrid.setAdapter(mAdapter);
+        */
+
+        // new FetchMoviesTask().execute(query);
+
+        //mAdapter.selectCriteria(json);
     }
 
     @Override
@@ -136,16 +179,44 @@ public class MoviePosters extends AppCompatActivity
     //   return true;
   // }
 
-
-    /* spinner adapter? inflater?
-    public void select(View view)
+    public class FetchMoviesTask extends AsyncTask<String, Void, String>
     {
-        Spinner sort = (Spinner) findViewById(R.id.sort);
-        String sortedBy = String.valueOf(sort.getSelectedItem());
-        mAdapter = new PosterAdapter(NUM_LIST_ITEMS, sortedBy);
-        mPosterGrid.setAdapter(mAdapter);
+        @Override
+        protected String doInBackground(String... params)
+        {
+            if (params.length == 0)
+                return null;
+            String urlString = params[0];
+            URL queryURL = NetworkUtils.createURL(urlString);
+            try {
+                String jsonString = NetworkUtils.getJsonResponseFromHttpUrl(queryURL);
+                return jsonString;
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e(TAG, e.toString());
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String jsonString)
+        {
+            if (jsonString != null) {
+                json = jsonString;
+                mAdapter.setJson(json);
+                mAdapter.setPosters();
+
+
+                //mAdapter.setJson(json);
+               // if (mToast != null)
+               //    mToast.cancel();
+
+                //mToast.show();
+            }
+
+        }
     }
-    */
+
 }
 
 

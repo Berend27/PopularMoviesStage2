@@ -22,9 +22,8 @@ public class JsonUtils {
             return posters;
         } catch (JSONException je) {
             Log.e(TAG, je.toString());
-            String[] posters = null;
-            return posters;
-        }
+            return null;
+        } catch (NullPointerException ne) {Log.e(TAG, ne.toString()); return null;}
 
     }
 

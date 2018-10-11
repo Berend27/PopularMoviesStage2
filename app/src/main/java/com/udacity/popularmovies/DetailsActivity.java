@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.support.v7.widget.Toolbar;
+import android.support.v7.app.ActionBar;
 
 import com.squareup.picasso.Picasso;
 
@@ -23,6 +25,11 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.movie_details);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.detailsToolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
         Intent intent = getIntent();
         String json = intent.getStringExtra("json");
         int place = intent.getIntExtra("place", 0);
