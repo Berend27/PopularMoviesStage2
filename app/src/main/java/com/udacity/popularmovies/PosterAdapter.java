@@ -56,8 +56,7 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.PosterView
         boolean shouldAttachToParentImmediately = false;
 
         View view = inflater.inflate(layoutIdForItem, viewGroup, shouldAttachToParentImmediately);
-        PosterViewHolder viewHolder = new PosterViewHolder(view);
-        return viewHolder;
+        return new PosterViewHolder(view);
     }
 
     @Override

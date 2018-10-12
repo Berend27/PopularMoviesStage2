@@ -182,8 +182,7 @@ public class MoviePosters extends AppCompatActivity
             URL queryURL = NetworkUtils.createURL(urlString);
             publishProgress(1);
             try {
-                String jsonString = NetworkUtils.getJsonResponseFromHttpUrl(queryURL);
-                return jsonString;
+                return NetworkUtils.getJsonResponseFromHttpUrl(queryURL);
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, e.toString());
