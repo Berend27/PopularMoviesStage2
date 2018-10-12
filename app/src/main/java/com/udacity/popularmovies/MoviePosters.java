@@ -1,21 +1,17 @@
 package com.udacity.popularmovies;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
@@ -32,17 +28,21 @@ public class MoviePosters extends AppCompatActivity
     private PosterAdapter mAdapter;
     private RecyclerView mPosterGrid;
 
+    private int option = 0;    // For starting with "Most Popular"
+
     private String json = null;
+
+    public boolean started = false;
 
     static final String POPULAR = "http://api.themoviedb.org/3/movie/popular?api_key=";
     static final String TOP_RATED = "http://api.themoviedb.org/3/movie/top_rated?api_key=";
-    static final String API_KEY = "9eae67985ee81a9b4780494317cc9229";    // Add your api key
+    static final String API_KEY = "";    // Add your api key
 
-    //final Context appContext = getApplicationContext();
-
-    String query = TOP_RATED + API_KEY;    // starting value
+    String query = POPULAR + API_KEY;    // starting value
 
     Toast mToast;
+
+    ProgressBar spinningDialog;
 
     FetchMoviesTask fetch = new FetchMoviesTask();
 
@@ -50,9 +50,14 @@ public class MoviePosters extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_posters);
+        if (savedInstanceState != null)
+        {
+            option = savedInstanceState.getInt("option");
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.posterToolbar);
         setSupportActionBar(toolbar);
 
+        spinningDialog = (ProgressBar) findViewById(R.id.spinning_progress);
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.sortBy,
@@ -62,27 +67,15 @@ public class MoviePosters extends AppCompatActivity
         // apply the adapter to the spinner
         Spinner sort = (Spinner) findViewById(R.id.sort);
         sort.setAdapter(adapter);
+
+        sort.setSelection(option);
         // setting the listener
         sort.setOnItemSelectedListener(this);
 
-        /*
-        Spinner sort = (Spinner) findViewById(R.id.sort);
-        String sortedBy = String.valueOf(sort.getSelectedItem());
-        */
 
         mPosterGrid = (RecyclerView) findViewById(R.id.rv_posters);
 
-        /*
-         * A LinearLayoutManager is responsible for measuring and positioning item views within a
-         * RecyclerView into a linear list. This means that it can produce either a horizontal or
-         * vertical list depending on which parameter you pass in to the LinearLayoutManager
-         * constructor. By default, if you don't specify an orientation, you get a vertical list.
-         * In our case, we want a vertical list, so we don't need to pass in an orientation flag to
-         * the LinearLayoutManager constructor.
-         *
-         * There are other LayoutManagers available to display your data in uniform grids,
-         * staggered grids, and more! See the developer documentation for more details.
-         */
+
         GridLayoutManager layoutManager = new GridLayoutManager(this, NUM_COLUMNS);
         mPosterGrid.setLayoutManager(layoutManager);
 
@@ -94,19 +87,16 @@ public class MoviePosters extends AppCompatActivity
 
         fetch.execute(query);
 
-        /*
-         * The GreenAdapter is responsible for displaying each item in the list.
-         */
-
-        mAdapter = new PosterAdapter(NUM_LIST_ITEMS, this, json);
-       // mToast = Toast.makeText(this, json , Toast.LENGTH_LONG);
-       // mToast.show();
-
-
-        mPosterGrid.setAdapter(mAdapter);
+        mAdapter = new PosterAdapter(NUM_LIST_ITEMS, this);
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt("option", option);
+    }
 
     @Override
     public void onListItemClicked(int clickedItemIndex) {
@@ -114,7 +104,6 @@ public class MoviePosters extends AppCompatActivity
         /*
         if (mToast != null)
             mToast.cancel();
-
 
         String toastMessage = String.valueOf(clickedItemIndex);
         mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT);
@@ -137,6 +126,7 @@ public class MoviePosters extends AppCompatActivity
         // An item was selected. You can retrieve the selected item using
         // parent.getItemAtPosition(pos)
         String selection = parent.getItemAtPosition(pos).toString();
+        option = pos;
         Toast.makeText(parent.getContext(), selection, Toast.LENGTH_LONG).show();
         if (selection.equals("Most Popular"))
             query = POPULAR + API_KEY;
@@ -179,8 +169,10 @@ public class MoviePosters extends AppCompatActivity
     //   return true;
   // }
 
-    public class FetchMoviesTask extends AsyncTask<String, Void, String>
+    public class FetchMoviesTask extends AsyncTask<String, Integer, String>
     {
+
+
         @Override
         protected String doInBackground(String... params)
         {
@@ -188,6 +180,7 @@ public class MoviePosters extends AppCompatActivity
                 return null;
             String urlString = params[0];
             URL queryURL = NetworkUtils.createURL(urlString);
+            publishProgress(1);
             try {
                 String jsonString = NetworkUtils.getJsonResponseFromHttpUrl(queryURL);
                 return jsonString;
@@ -199,6 +192,17 @@ public class MoviePosters extends AppCompatActivity
         }
 
         @Override
+        protected void onPreExecute() {
+            if (!started)
+                spinningDialog.setVisibility(spinningDialog.VISIBLE);
+        }
+
+        protected void onProgressUpdate(int... values)
+        {
+            spinningDialog.setProgress(values[0]);
+        }
+
+        @Override
         protected void onPostExecute(String jsonString)
         {
             if (jsonString != null) {
@@ -206,13 +210,14 @@ public class MoviePosters extends AppCompatActivity
                 mAdapter.setJson(json);
                 mAdapter.setPosters();
 
+                if (started == false)
+                {
+                    mPosterGrid.setAdapter(mAdapter);
+                    started = true;
+                }
 
-                //mAdapter.setJson(json);
-               // if (mToast != null)
-               //    mToast.cancel();
-
-                //mToast.show();
             }
+            spinningDialog.setVisibility(spinningDialog.GONE);
 
         }
     }
