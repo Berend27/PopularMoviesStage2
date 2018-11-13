@@ -1,10 +1,14 @@
 package com.udacity.popularmovies;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.app.ActionBar;
@@ -50,5 +54,33 @@ public class DetailsActivity extends AppCompatActivity {
 
         overview = (TextView) findViewById(R.id.synopsis);
         overview.setText(details[4]);
+
+        // Creating an adapter to populate the ListView
+        ArrayAdapter<Trailer> trailerArrayAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1, Trailer.trailers);
+        ListView trailersList = (ListView) findViewById(R.id.list_trailers);
+        trailersList.setAdapter(trailerArrayAdapter);
+
+        // Creating a Listener for the trailers list
+        AdapterView.OnItemClickListener itemClickListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                // Play the trailer that was clicked on
+                String video_path = "http://www.youtube.com/watch?v="
+                        + Trailer.trailers[position].getYouTubeKey();
+                Uri uri = Uri.parse(video_path);
+                Intent trailerIntent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(trailerIntent);
+            }
+        };
+
+        // Assign the listener to the ListView
+        trailersList.setOnItemClickListener(itemClickListener);
     }
 }
+
+/*
+        String chooserTitle = "Select an app to watch the video in";
+        Intent chosenIntent = Intent.createChooser(trailerIntent, chooserTitle);
+        startActivity(chosenIntent);
+ */

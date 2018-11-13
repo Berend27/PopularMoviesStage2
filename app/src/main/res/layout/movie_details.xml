@@ -79,20 +79,33 @@
         </RelativeLayout>
     </LinearLayout>
 
-    <TextView
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dp"
+                android:text="@string/plotSynopsis"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="150dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:textSize="16sp"
+            android:id="@+id/synopsis"/>
+
+    </ScrollView>
+
+    <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="8dp"
-        android:text="@string/plotSynopsis"
-        android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:id="@+id/list_trailers">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:textSize="16sp"
-        android:id="@+id/synopsis"/>
-
+    </ListView>
 </LinearLayout>

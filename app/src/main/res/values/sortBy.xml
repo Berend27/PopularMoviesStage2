@@ -3,5 +3,6 @@
     <string-array name="sortBy">
         <item>Most Popular</item>
         <item>Top Rated</item>
+        <item>Favorites</item>
     </string-array>
 </resources>

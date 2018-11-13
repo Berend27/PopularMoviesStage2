@@ -36,7 +36,7 @@ public class MoviePosters extends AppCompatActivity
 
     static final String POPULAR = "http://api.themoviedb.org/3/movie/popular?api_key=";
     static final String TOP_RATED = "http://api.themoviedb.org/3/movie/top_rated?api_key=";
-    static final String API_KEY = "";    // Add your api key
+    static final String API_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;    // Add your api key
 
     String query = POPULAR + API_KEY;    // starting value
 
@@ -132,6 +132,11 @@ public class MoviePosters extends AppCompatActivity
             query = POPULAR + API_KEY;
         else if (selection.equals("Top Rated"))
             query = TOP_RATED + API_KEY;
+        else if (selection.equals("Favorites"))
+        {
+            Intent favoritesIntent = new Intent(this, FavoritesActivity.class);
+            startActivity(favoritesIntent);
+        }
         new FetchMoviesTask().execute(query);
 
         /*
