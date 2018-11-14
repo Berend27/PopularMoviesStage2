@@ -231,12 +231,3 @@ public class MoviePosters extends AppCompatActivity
 
      //  Picasso.get().load("https://scontent-dfw5-2.xx.fbcdn.net/v/t31.0-8/21427310_10210605307356571_2524072672159646116_o.jpg?_nc_cat=110&oh=c45c1b78f877829bcf42789c750f10b4&oe=5C4E0247").into(imageView);
 
-/* add the spinner as a menu item?
-<item android:id="@+id/spinner"
-        android:title="@string/sort"
-        android:orderInCategory="1"
-        app:showAsAction="ifRoom"
-        app:actionViewClass="android.widget.Spinner"
-        android:entries="@array/sortBy"
-        />
- */

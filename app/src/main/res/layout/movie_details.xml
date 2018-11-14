@@ -102,6 +102,17 @@
 
     </ScrollView>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/trailers_label"
+        android:paddingLeft="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:text="@string/videosLabel"
+        android:textSize="16sp"
+        android:textStyle="bold"/>
+
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
