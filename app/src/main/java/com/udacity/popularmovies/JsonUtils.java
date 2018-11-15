@@ -1,5 +1,6 @@
 package com.udacity.popularmovies;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -74,6 +75,39 @@ public class JsonUtils {
                 trailers[i] = new Trailer(title, key);
             }
             return trailers;
+        } catch (JSONException je) {
+            Log.e(TAG, je.toString());
+            return null;
+        } catch (Exception e) {
+            Log.e(TAG, "Some other problem");
+            return null;
+        }
+    }
+
+    public static String[] getReviews(String json, Context context)
+    {
+        String author, content;
+        String by = context.getResources().getString(R.string.reviewedBy);
+        try {
+            JSONObject queryResults = new JSONObject(json);
+            JSONArray resultsArray = queryResults.getJSONArray("results");
+            if (!resultsArray.isNull(0)) {
+                String[] reviews = new String[resultsArray.length() + 1];
+                for (int i = 0; i < resultsArray.length(); i++) {
+                    JSONObject review = resultsArray.getJSONObject(i);
+                    author = review.getString("author");
+                    content = review.getString("content");
+                    reviews[i] = "\n" + String.valueOf(i + 1) + ".  " + content + "\n" + by + " "
+                            + author + "\n";
+                }
+                reviews[resultsArray.length()]
+                        = "\n" + context.getResources().getString(R.string.source_of_reviews);
+                return reviews;
+            }
+            else  // empty array
+            {
+                return new String[0];
+            }
         } catch (JSONException je) {
             Log.e(TAG, je.toString());
             return null;

@@ -22,11 +22,16 @@
         </activity>
         <activity
             android:name=".DetailsActivity"
-            android:parentActivityName=".MoviePosters">
+            android:parentActivityName=".MoviePosters"
+            android:launchMode="singleTop">
         </activity>
         <activity
             android:name=".FavoritesActivity"
             android:parentActivityName=".MoviePosters">
+        </activity>
+        <activity
+            android:name=".ReviewsActivity"
+            android:parentActivityName=".DetailsActivity">
         </activity>
     </application>
 

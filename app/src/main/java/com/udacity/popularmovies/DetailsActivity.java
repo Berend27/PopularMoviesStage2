@@ -41,6 +41,13 @@ public class DetailsActivity extends AppCompatActivity {
 
     private String movieId;
     private String trailerQuery;
+    private String json;
+
+    String[] details;
+
+    int place;
+
+    boolean doneLoading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +58,12 @@ public class DetailsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        // The launchMode is singleTop, so the activity keeps the intent
         Intent intent = getIntent();
-        String json = intent.getStringExtra("json");
-        int place = intent.getIntExtra("place", 0);
+        json = intent.getStringExtra("json");
+        place = intent.getIntExtra("place", 0);
 
-        String[] details = JsonUtils.getDetails(json, place);
+        details = JsonUtils.getDetails(json, place);
 
         title = (TextView) findViewById(R.id.title);
         title.setText(details[0]);
@@ -136,8 +144,29 @@ public class DetailsActivity extends AppCompatActivity {
                 videosLabel.setVisibility(View.VISIBLE);
             }
             populateListView();
+            doneLoading = true;
         }
     }
+
+    protected void readReviews(View view)
+    {
+        if (doneLoading) {
+            Intent reviewsIntent = new Intent(this, ReviewsActivity.class);
+            reviewsIntent.putExtra(ReviewsActivity.TITLE_KEY, details[0]);
+            reviewsIntent.putExtra(ReviewsActivity.ID_KEY, movieId);
+            startActivity(reviewsIntent);
+        }
+    }
+
+    /*
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString("json", json);
+        savedInstanceState.putInt("place", place);
+    }
+    */
 }
 
 /*
