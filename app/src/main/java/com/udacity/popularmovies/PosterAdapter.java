@@ -22,7 +22,7 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.PosterView
 
     protected String json;
 
-    private String[] posters = JsonUtils.getPoster(json);
+    private String[] posters;
 
     public interface PosterItemClickListener{
         void onListItemClicked(int clickedItemIndex);

@@ -92,9 +92,25 @@
                 android:textSize="16sp"
                 android:textAllCaps="false"
                 android:layout_below="@+id/voter_average"
-                android:layout_toRightOf="@+id/va_label"
+                android:layout_marginStart="24dp"
                 android:gravity="center"
                 android:onClick="readReviews"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/mark_as_favorite"
+                android:padding="4dp"
+                android:background="?android:colorBackground"
+                android:text="@string/add_to_favorites"
+                android:textColor="@color/colorPrimaryDark"
+                android:textStyle="normal"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:layout_below="@+id/voter_average"
+                android:layout_marginStart="24dp"
+                android:gravity="center"
+                android:onClick="addToFavorites"/>
         </RelativeLayout>
     </LinearLayout>
 

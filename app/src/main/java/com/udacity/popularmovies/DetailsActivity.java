@@ -1,6 +1,8 @@
 package com.udacity.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -16,6 +19,9 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.app.ActionBar;
 
 import com.squareup.picasso.Picasso;
+import com.udacity.popularmovies.database.AppExecutors;
+import com.udacity.popularmovies.database.FavoritesDatabase;
+import com.udacity.popularmovies.database.FavoritesEntry;
 
 import org.w3c.dom.Text;
 
@@ -48,6 +54,12 @@ public class DetailsActivity extends AppCompatActivity {
     int place;
 
     boolean doneLoading = false;
+
+    Button favoritesButton;
+
+    private Context context = this;
+
+    private FavoritesDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +101,10 @@ public class DetailsActivity extends AppCompatActivity {
         trailerQuery = START_OF_TRAILER_QUERY + movieId + END_OF_TRAILER_QUERY;
         fetch.execute(trailerQuery);
 
+        // Initialize member variable for the data base
+        mDb = FavoritesDatabase.getInstance(getApplicationContext());
+
+        favoritesButton  = (Button) findViewById(R.id.mark_as_favorite);
 
     }
 
@@ -155,6 +171,24 @@ public class DetailsActivity extends AppCompatActivity {
             reviewsIntent.putExtra(ReviewsActivity.TITLE_KEY, details[0]);
             reviewsIntent.putExtra(ReviewsActivity.ID_KEY, movieId);
             startActivity(reviewsIntent);
+        }
+    }
+
+    protected void addToFavorites(View view)
+    {
+        if (doneLoading)
+        {
+            final FavoritesEntry addition = new FavoritesEntry(details[0], details[1], details[2],
+                    details[3], details[4], details[5]);
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    mDb.getFavoritesDao().insertFavorite(addition);
+                }
+            });
+
+            // the code is not ready for finish();
+            favoritesButton.setText("Favorited");
         }
     }
 

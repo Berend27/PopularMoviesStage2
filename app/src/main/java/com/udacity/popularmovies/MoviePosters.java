@@ -29,6 +29,7 @@ public class MoviePosters extends AppCompatActivity
     private RecyclerView mPosterGrid;
 
     private int option = 0;    // For starting with "Most Popular"
+    private int beforeFavorites = 0;    // the selected option before "Favorites" was selected
 
     private String json = null;
 
@@ -46,10 +47,15 @@ public class MoviePosters extends AppCompatActivity
 
     FetchMoviesTask fetch = new FetchMoviesTask();
 
+    Bundle state;
+
+    Spinner sort;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_posters);
+        state = savedInstanceState;
         if (savedInstanceState != null)
         {
             option = savedInstanceState.getInt("option");
@@ -65,10 +71,10 @@ public class MoviePosters extends AppCompatActivity
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(R.layout.custom_spinner_item);
         // apply the adapter to the spinner
-        Spinner sort = (Spinner) findViewById(R.id.sort);
+        sort = (Spinner) findViewById(R.id.sort);
         sort.setAdapter(adapter);
 
-        sort.setSelection(option);
+        sort.setSelection(beforeFavorites);
         // setting the listener
         sort.setOnItemSelectedListener(this);
 
@@ -128,26 +134,25 @@ public class MoviePosters extends AppCompatActivity
         String selection = parent.getItemAtPosition(pos).toString();
         option = pos;
         Toast.makeText(parent.getContext(), selection, Toast.LENGTH_LONG).show();
-        if (selection.equals("Most Popular"))
+        if (selection.equals("Most Popular")) {
             query = POPULAR + API_KEY;
-        else if (selection.equals("Top Rated"))
+            beforeFavorites = option;
+        }
+        else if (selection.equals("Top Rated")) {
             query = TOP_RATED + API_KEY;
+            beforeFavorites = option;
+        }
         else if (selection.equals("Favorites"))
         {
             Intent favoritesIntent = new Intent(this, FavoritesActivity.class);
+
+            // Make sure that the option isn't still "Favorites" after navigating back
+            option = beforeFavorites;
+            sort.setSelection(option);
             startActivity(favoritesIntent);
         }
         new FetchMoviesTask().execute(query);
 
-        /*
-        mAdapter = new PosterAdapter(NUM_LIST_ITEMS, this, json);
-        mAdapter.setJson(json);
-        mPosterGrid.setAdapter(mAdapter);
-        */
-
-        // new FetchMoviesTask().execute(query);
-
-        //mAdapter.selectCriteria(json);
     }
 
     @Override
