@@ -58,6 +58,34 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         }
     }
 
+    protected String[] getMovie(int index)
+    {
+        String[] movie = new String[6];
+        if (entries != null)
+        {
+            // title, release date, poster, average vote, overview, id
+            movie[0] = entries.get(index).getTitle();
+            movie[1] = entries.get(index).getReleaseDate();
+            movie[2] = entries.get(index).getPosterUrlString();
+            movie[3] = entries.get(index).getAverageRating();
+            movie[4] = entries.get(index).getSynopsis();
+            movie[5] = entries.get(index).getId();
+        }
+        return movie;
+    }
+
+    public boolean favorited(String id)
+    {
+        if (entries == null)
+            return false;
+        for (int i = 0; i < entries.size(); i++)
+        {
+            if (entries.get(i).getId().equals(id))
+                return true;
+        }
+        return false;
+    }
+
     @NonNull
     @Override
     public FavoritesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

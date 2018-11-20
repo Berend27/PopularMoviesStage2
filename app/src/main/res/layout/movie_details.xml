@@ -107,7 +107,7 @@
                 android:textStyle="normal"
                 android:textSize="16sp"
                 android:textAllCaps="false"
-                android:layout_below="@+id/voter_average"
+                android:layout_below="@+id/view_reviews"
                 android:layout_marginStart="24dp"
                 android:gravity="center"
                 android:onClick="addToFavorites"/>

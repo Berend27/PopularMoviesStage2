@@ -26,6 +26,7 @@ import com.udacity.popularmovies.database.FavoritesEntry;
 import org.w3c.dom.Text;
 
 import java.net.URL;
+import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
@@ -49,11 +50,12 @@ public class DetailsActivity extends AppCompatActivity {
     private String trailerQuery;
     private String json;
 
-    String[] details;
+    private String[] details;
 
     int place;
 
     boolean doneLoading = false;
+    boolean alreadyFavored = false;
 
     Button favoritesButton;
 
@@ -105,7 +107,15 @@ public class DetailsActivity extends AppCompatActivity {
         mDb = FavoritesDatabase.getInstance(getApplicationContext());
 
         favoritesButton  = (Button) findViewById(R.id.mark_as_favorite);
+        favoritesButton.setVisibility(View.INVISIBLE);  // made visible in onResume
 
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        favored(movieId);
     }
 
     protected void populateListView()
@@ -178,18 +188,75 @@ public class DetailsActivity extends AppCompatActivity {
     {
         if (doneLoading)
         {
-            final FavoritesEntry addition = new FavoritesEntry(details[0], details[1], details[2],
+            final FavoritesEntry thisEntry = new FavoritesEntry(details[0], details[1], details[2],
                     details[3], details[4], details[5]);
+            if (!alreadyFavored) {
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.getFavoritesDao().insertFavorite(thisEntry);
+                    }
+                });
+                // the code is not ready for finish();
+                favoritesButton.setText("Remove from Favorites");
+                alreadyFavored = true;
+            }
+            else
+            {
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.getFavoritesDao().deleteEntry(thisEntry);
+                    }
+                });
+                favoritesButton.setText("Add to Favorites");
+                alreadyFavored = false;
+            }
+        }
+    }
+
+    void favored(String id)
+    {
+        // boolean alreadyFavored
+            final String theId = id;
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
-                    mDb.getFavoritesDao().insertFavorite(addition);
+                    if (mDb == null)
+                        return;
+                    List<FavoritesEntry> entries = mDb.getFavoritesDao().loadAllFavorites();
+                    if (entries == null)
+                        setAlreadyFavored(false);
+                    else {
+                        setAlreadyFavored(false);
+                        for (int i = 0; i < entries.size(); i++) {
+                            if (entries.get(i).getId().equals(theId)) {
+                                setAlreadyFavored(true);
+                            }
+                        }
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (getAlreadyFavored())
+                                favoritesButton.setText("Remove from Favorites");
+                            else
+                                favoritesButton.setText("Add to Favorites");
+                            favoritesButton.setVisibility(View.VISIBLE);
+                        }
+                    });
                 }
             });
+    }
 
-            // the code is not ready for finish();
-            favoritesButton.setText("Favorited");
-        }
+    void setAlreadyFavored(boolean value)
+    {
+        alreadyFavored = value;
+    }
+
+    boolean getAlreadyFavored()
+    {
+        return alreadyFavored;
     }
 
     /*

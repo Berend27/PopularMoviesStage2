@@ -58,17 +58,17 @@ public class FavoritesActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Context context = getApplicationContext();
-                        title = mAdapter.getTitleTest();
+                        // Context context = getApplicationContext();
                         if (started == false)
                         {
                             mPosterGrid.setAdapter(mAdapter);
                             started = true;
                         }
-
+                        /*
                         int duration = Toast.LENGTH_SHORT;
                         Toast toast = Toast.makeText(context, title, duration);
                         toast.show();
+                        */
                     }
                 });
             }
@@ -81,6 +81,9 @@ public class FavoritesActivity extends AppCompatActivity
 
     @Override
     public void onListItemClicked(int clickedItemIndex) {
-
+        String[] details = mAdapter.getMovie(clickedItemIndex);
+        Intent intent = new Intent(this, FavoredDetails.class);
+        intent.putExtra(FavoredDetails.FAVORED_DETAILS_KEY, details);
+        startActivity(intent);
     }
 }

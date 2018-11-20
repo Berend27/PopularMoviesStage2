@@ -33,6 +33,11 @@
             android:name=".ReviewsActivity"
             android:parentActivityName=".DetailsActivity">
         </activity>
+        <activity
+            android:name=".FavoredDetails"
+            android:parentActivityName=".FavoritesActivity"
+            android:launchMode="singleTop">
+        </activity>
     </application>
 
 </manifest>
