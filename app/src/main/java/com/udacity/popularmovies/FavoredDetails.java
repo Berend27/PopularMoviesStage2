@@ -1,6 +1,8 @@
 package com.udacity.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
@@ -82,6 +84,13 @@ public class FavoredDetails extends DetailsActivity {
         }
 
         favoritesButton.setVisibility(View.VISIBLE);
+
+        // Show the view reviews button if there is an internet connection
+        Button reviewsButton = (Button) findViewById(R.id.view_reviews);
+        if (isConnected())
+            reviewsButton.setVisibility(View.VISIBLE);
+        else
+            reviewsButton.setVisibility(View.GONE);
     }
 
     @Override
@@ -114,5 +123,22 @@ public class FavoredDetails extends DetailsActivity {
                 alreadyFavored = false;
             }
         }
+    }
+
+    @Override
+    protected void readReviews(View view)
+    {
+        if (doneLoading) {
+            Intent reviewsIntent = new Intent(this, ReviewsActivity.class);
+            reviewsIntent.putExtra(ReviewsActivity.TITLE_KEY, details[0]);
+            reviewsIntent.putExtra(ReviewsActivity.ID_KEY, movieId);
+            startActivity(reviewsIntent);
+        }
+    }
+
+    protected boolean isConnected()
+    {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null;
     }
 }

@@ -51,6 +51,8 @@ public class MoviePosters extends AppCompatActivity
 
     Spinner sort;
 
+    boolean favoritesSelected = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,21 +133,25 @@ public class MoviePosters extends AppCompatActivity
     {
         // An item was selected. You can retrieve the selected item using
         // parent.getItemAtPosition(pos)
+
         String selection = parent.getItemAtPosition(pos).toString();
         option = pos;
-        Toast.makeText(parent.getContext(), selection, Toast.LENGTH_LONG).show();
+        if (!favoritesSelected)    // done to prevent an irrelevant toast
+            Toast.makeText(parent.getContext(), selection, Toast.LENGTH_LONG).show();
         if (selection.equals("Most Popular")) {
             query = POPULAR + API_KEY;
             beforeFavorites = option;
+            favoritesSelected = false;
         }
         else if (selection.equals("Top Rated")) {
             query = TOP_RATED + API_KEY;
             beforeFavorites = option;
+            favoritesSelected = false;
         }
         else if (selection.equals("Favorites"))
         {
             Intent favoritesIntent = new Intent(this, FavoritesActivity.class);
-
+            favoritesSelected = true;
             // Make sure that the option isn't still "Favorites" after navigating back
             option = beforeFavorites;
             sort.setSelection(option);

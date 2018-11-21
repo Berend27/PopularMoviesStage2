@@ -27,6 +27,7 @@ public class ReviewsActivity extends AppCompatActivity {
     final String END_OF_REVIEWS_QUERY = "/reviews?api_key=" + BuildConfig.THE_MOVIE_DB_API_KEY;    // Add your api key
 
     TextView pageTitle;
+    TextView noReviews;
 
     String id;
 
@@ -45,6 +46,9 @@ public class ReviewsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+
+        noReviews  = (TextView) findViewById(R.id.no_reviews);
+        noReviews.setVisibility(View.INVISIBLE);     // a blank screen after the toolbar so far
 
         Intent startingIntent = getIntent();
         String title = startingIntent.getStringExtra(TITLE_KEY);
@@ -69,7 +73,7 @@ public class ReviewsActivity extends AppCompatActivity {
         ListView reviewsListView = (ListView) findViewById(R.id.reviews_list);
         reviewsListView.setAdapter(reviewsAdapter);
 
-        TextView noReviews = (TextView) findViewById(R.id.no_reviews);
+        //  TextView noReviews = (TextView) findViewById(R.id.no_reviews);
         if (reviews.length == 0)
         {
             reviewsListView.setVisibility(View.GONE);
@@ -83,7 +87,8 @@ public class ReviewsActivity extends AppCompatActivity {
     }
 
     public class FetchReviewsTask extends AsyncTask<String, Void, String>
-    {
+    {   // boolean for if the connection is successful
+        private boolean connection;
         // Gets a JSON String from an HTTP request
         @Override
         protected String doInBackground(String... strings) {
@@ -92,8 +97,10 @@ public class ReviewsActivity extends AppCompatActivity {
             String urlString = strings[0];
             URL queryUrl = NetworkUtils.createURL(urlString);
             try {
+                connection = true;
                 return NetworkUtils.getJsonResponseFromHttpUrl(queryUrl);
             } catch (Exception e) {
+                connection = false;
                 e.printStackTrace();
                 Log.d(TAG, e.toString());
                 return null;
@@ -103,8 +110,10 @@ public class ReviewsActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String jsonString)
         {
-            reviews = JsonUtils.getReviews(jsonString, context);
-            populateListView();
+            if (jsonString != null) {
+                reviews = JsonUtils.getReviews(jsonString, context);
+                populateListView();
+            }
         }
     }
 

@@ -1,10 +1,14 @@
 package com.udacity.popularmovies;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,7 +32,6 @@ import org.w3c.dom.Text;
 import java.net.URL;
 import java.util.List;
 
-import static android.content.ContentValues.TAG;
 
 public class DetailsActivity extends AppCompatActivity {
 
@@ -42,6 +45,8 @@ public class DetailsActivity extends AppCompatActivity {
     Trailer[] trailers;
 
     FetchTrailersTask fetch = new FetchTrailersTask();
+
+    private static final String TAG = DetailsActivity.class.getSimpleName();
 
     final String START_OF_TRAILER_QUERY = "https://api.themoviedb.org/3/movie/";
     final String END_OF_TRAILER_QUERY = "/videos?api_key=" + BuildConfig.THE_MOVIE_DB_API_KEY;    // Add your api key
@@ -107,16 +112,11 @@ public class DetailsActivity extends AppCompatActivity {
         mDb = FavoritesDatabase.getInstance(getApplicationContext());
 
         favoritesButton  = (Button) findViewById(R.id.mark_as_favorite);
-        favoritesButton.setVisibility(View.INVISIBLE);  // made visible in onResume
-
-    }
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
+        favoritesButton.setVisibility(View.INVISIBLE);  // made visible in favored()
         favored(movieId);
+
     }
+
 
     protected void populateListView()
     {
@@ -168,8 +168,9 @@ public class DetailsActivity extends AppCompatActivity {
             if (trailers != null)
             {
                 videosLabel.setVisibility(View.VISIBLE);
+                populateListView();
             }
-            populateListView();
+
             doneLoading = true;
         }
     }
@@ -198,7 +199,7 @@ public class DetailsActivity extends AppCompatActivity {
                     }
                 });
                 // the code is not ready for finish();
-                favoritesButton.setText("Remove from Favorites");
+                favoritesButton.setText(getResources().getText(R.string.removeFromFavorites));
                 alreadyFavored = true;
             }
             else
@@ -209,7 +210,7 @@ public class DetailsActivity extends AppCompatActivity {
                         mDb.getFavoritesDao().deleteEntry(thisEntry);
                     }
                 });
-                favoritesButton.setText("Add to Favorites");
+                favoritesButton.setText(getResources().getText(R.string.add_to_favorites));
                 alreadyFavored = false;
             }
         }
@@ -217,36 +218,34 @@ public class DetailsActivity extends AppCompatActivity {
 
     void favored(String id)
     {
-        // boolean alreadyFavored
+        // boolean alreadyFavored is used with a getter method and a setter method
             final String theId = id;
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (mDb == null)
-                        return;
-                    List<FavoritesEntry> entries = mDb.getFavoritesDao().loadAllFavorites();
-                    if (entries == null)
-                        setAlreadyFavored(false);
-                    else {
-                        setAlreadyFavored(false);
-                        for (int i = 0; i < entries.size(); i++) {
-                            if (entries.get(i).getId().equals(theId)) {
-                                setAlreadyFavored(true);
-                            }
+        if (mDb == null)
+            return;
+        Log.d(TAG, "Actively retrieving the list favored movies from the database");
+        FavoritesViewModel viewModel = ViewModelProviders.of(this).get(FavoritesViewModel.class);
+        viewModel.getFavorites().observe(this, new Observer<List<FavoritesEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<FavoritesEntry> favoritesEntries) {
+                Log.d(TAG, "Setting alreadyFavored");
+                if (favoritesEntries == null)
+                    setAlreadyFavored(false);
+                else {
+                    setAlreadyFavored(false);
+                    for (int i = 0; i < favoritesEntries.size(); i++) {
+                        if (favoritesEntries.get(i).getId().equals(theId)) {
+                            setAlreadyFavored(true);
                         }
                     }
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (getAlreadyFavored())
-                                favoritesButton.setText("Remove from Favorites");
-                            else
-                                favoritesButton.setText("Add to Favorites");
-                            favoritesButton.setVisibility(View.VISIBLE);
-                        }
-                    });
                 }
-            });
+                if (getAlreadyFavored())
+                    favoritesButton.setText("Remove from Favorites");
+                else
+                    favoritesButton.setText("Add to Favorites");
+                favoritesButton.setVisibility(View.VISIBLE);
+            }
+        });
+
     }
 
     void setAlreadyFavored(boolean value)

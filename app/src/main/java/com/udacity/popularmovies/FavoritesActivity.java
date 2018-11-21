@@ -1,24 +1,35 @@
 package com.udacity.popularmovies;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.nfc.Tag;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.udacity.popularmovies.database.AppExecutors;
 import com.udacity.popularmovies.database.FavoritesDatabase;
+import com.udacity.popularmovies.database.FavoritesEntry;
+
+import java.util.List;
 
 public class FavoritesActivity extends AppCompatActivity
     implements PosterAdapter.PosterItemClickListener {
 
     private static final int NUM_COLUMNS = 2;
+
+    private static final String TAG = FavoritesActivity.class.getSimpleName();
 
     private FavoritesAdapter mAdapter;
     private FavoritesDatabase mDb;
@@ -43,40 +54,26 @@ public class FavoritesActivity extends AppCompatActivity
 
         mAdapter = new FavoritesAdapter(this, this);
         mDb = FavoritesDatabase.getInstance(getApplicationContext());
+
+        setupViewModel();
     }
 
-    @Override
-    protected void onResume()
+    private void setupViewModel()
     {
-        super.onResume();
-
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+        // Instantiate the ViewModel and observe the LiveData from it
+        FavoritesViewModel viewModel = ViewModelProviders.of(this).get(FavoritesViewModel.class);
+        viewModel.getFavorites().observe(this, new Observer<List<FavoritesEntry>>() {
             @Override
-            public void run() {
-                mAdapter.setFavorites(mDb.getFavoritesDao().loadAllFavorites());
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Context context = getApplicationContext();
-                        if (started == false)
-                        {
-                            mPosterGrid.setAdapter(mAdapter);
-                            started = true;
-                        }
-                        /*
-                        int duration = Toast.LENGTH_SHORT;
-                        Toast toast = Toast.makeText(context, title, duration);
-                        toast.show();
-                        */
-                    }
-                });
+            public void onChanged(@Nullable List<FavoritesEntry> favoritesEntries) {
+                Log.d(TAG, "Receiving a database update from LiveData with a ViewModel");
+                mAdapter.setFavorites(favoritesEntries);
+                if (started == false)
+                {
+                    mPosterGrid.setAdapter(mAdapter);
+                    started = true;
+                }
             }
         });
-
-
-
-
     }
 
     @Override

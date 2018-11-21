@@ -1,5 +1,6 @@
 package com.udacity.popularmovies.database;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -12,7 +13,7 @@ import java.util.List;
 @Dao
 public interface FavoritesDao {
     @Query("SELECT * FROM favorites ORDER BY title")
-    List<FavoritesEntry> loadAllFavorites();
+    LiveData<List<FavoritesEntry>> loadAllFavorites();
 
     @Query("SELECT * FROM favorites WHERE id = :id")
     FavoritesEntry getItemById(Long id);
