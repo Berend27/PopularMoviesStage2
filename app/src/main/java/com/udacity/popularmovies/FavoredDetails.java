@@ -75,7 +75,7 @@ public class FavoredDetails extends DetailsActivity {
     protected void onResume()
     {
         alreadyFavored = true;
-        favoritesButton.setText("Remove from Favorites");
+        favoritesButton.setText(getResources().getString(R.string.removeFromFavorites));
         try {
             super.onResume();
         } catch (NullPointerException npe) {
@@ -94,7 +94,7 @@ public class FavoredDetails extends DetailsActivity {
     }
 
     @Override
-    protected void addToFavorites(View view)
+    public void addToFavorites(View view)
     {
         if (doneLoading)
         {
@@ -108,7 +108,7 @@ public class FavoredDetails extends DetailsActivity {
                     }
                 });
                 // the code is not ready for finish();
-                favoritesButton.setText("Remove from Favorites");
+                favoritesButton.setText(getResources().getString(R.string.removeFromFavorites));
                 alreadyFavored = true;
             }
             else
@@ -119,14 +119,14 @@ public class FavoredDetails extends DetailsActivity {
                         mDb.getFavoritesDao().deleteEntry(thisEntry);
                     }
                 });
-                favoritesButton.setText("Add to Favorites");
+                favoritesButton.setText(getResources().getString(R.string.add_to_favorites));
                 alreadyFavored = false;
             }
         }
     }
 
     @Override
-    protected void readReviews(View view)
+    public void readReviews(View view)
     {
         if (doneLoading) {
             Intent reviewsIntent = new Intent(this, ReviewsActivity.class);

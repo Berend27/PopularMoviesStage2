@@ -175,7 +175,7 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
-    protected void readReviews(View view)
+    public void readReviews(View view)
     {
         if (doneLoading) {
             Intent reviewsIntent = new Intent(this, ReviewsActivity.class);
@@ -185,7 +185,7 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
-    protected void addToFavorites(View view)
+    public void addToFavorites(View view)
     {
         if (doneLoading)
         {
@@ -216,6 +216,7 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
+    // This method checks if a movie has already been favored
     void favored(String id)
     {
         // boolean alreadyFavored is used with a getter method and a setter method
@@ -239,9 +240,9 @@ public class DetailsActivity extends AppCompatActivity {
                     }
                 }
                 if (getAlreadyFavored())
-                    favoritesButton.setText("Remove from Favorites");
+                    favoritesButton.setText(getResources().getString(R.string.removeFromFavorites));
                 else
-                    favoritesButton.setText("Add to Favorites");
+                    favoritesButton.setText(getResources().getString(R.string.add_to_favorites));
                 favoritesButton.setVisibility(View.VISIBLE);
             }
         });

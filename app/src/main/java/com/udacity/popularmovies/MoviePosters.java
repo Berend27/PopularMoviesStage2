@@ -31,13 +31,12 @@ public class MoviePosters extends AppCompatActivity
     private int option = 0;    // For starting with "Most Popular"
     private int beforeFavorites = 0;    // the selected option before "Favorites" was selected
 
-    private String json = null;
-
     public boolean started = false;
 
     static final String POPULAR = "http://api.themoviedb.org/3/movie/popular?api_key=";
     static final String TOP_RATED = "http://api.themoviedb.org/3/movie/top_rated?api_key=";
-    static final String API_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;    // Add your api key
+    // Add your api key to the gradle.properties file for project-wide Gradle settings
+    static final String API_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;
 
     String query = POPULAR + API_KEY;    // starting value
 
@@ -108,16 +107,6 @@ public class MoviePosters extends AppCompatActivity
 
     @Override
     public void onListItemClicked(int clickedItemIndex) {
-        // getting rid of old toast
-        /*
-        if (mToast != null)
-            mToast.cancel();
-
-        String toastMessage = String.valueOf(clickedItemIndex);
-        mToast = Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT);
-        mToast.show();
-        */
-
 
         Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra("key", "http://image.tmdb.org/t/p/w185//3IGbjc5ZC5yxim5W0sFING2kdcz.jpg");
@@ -168,23 +157,6 @@ public class MoviePosters extends AppCompatActivity
     }
 
 
-    //  @Override
-  //  public boolean onCreateOptionsMenu(Menu menu) {
-        /* Use AppCompatActivity's method getMenuInflater to get a handle on the menu inflater */
-    //    MenuInflater inflater = getMenuInflater();
-        /* Use the inflater's inflate method to inflate our menu layout to this menu */
-    //    inflater.inflate(R.menu.sort, menu);
-        /* Return true so that the menu is displayed in the Toolbar */
-      //  Spinner s = (Spinner) menu.findItem(R.id.sort).getActionView(); // find the spinner
-
-        /*SpinnerAdapter mSpinnerAdapter = ArrayAdapter.createFromResource(getActivity().getActionBar()
-                .getThemedContext(), R.array.sortBy, android.R.layout.simple_spinner_dropdown_item); //  create the adapter from a StringArray
-        s.setAdapter(mSpinnerAdapter); // set the adapter
-        */
-
-    //   return true;
-  // }
-
     public class FetchMoviesTask extends AsyncTask<String, Integer, String>
     {
 
@@ -221,7 +193,7 @@ public class MoviePosters extends AppCompatActivity
         protected void onPostExecute(String jsonString)
         {
             if (jsonString != null) {
-                json = jsonString;
+                String json = jsonString;
                 mAdapter.setJson(json);
                 mAdapter.setPosters();
 
@@ -238,7 +210,4 @@ public class MoviePosters extends AppCompatActivity
     }
 
 }
-
-
-     //  Picasso.get().load("https://scontent-dfw5-2.xx.fbcdn.net/v/t31.0-8/21427310_10210605307356571_2524072672159646116_o.jpg?_nc_cat=110&oh=c45c1b78f877829bcf42789c750f10b4&oe=5C4E0247").into(imageView);
 

@@ -19,9 +19,9 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:id="@+id/title"
-        android:text="@string/app_name"
+        tools:text="@string/app_name"
         android:textStyle="bold"
-        android:textColor="@color/theatreRed"
+        android:textColor="@color/purpleTitle"
         android:padding="4dp"
         android:textSize="22sp"/>
 
@@ -122,7 +122,8 @@
                 android:paddingLeft="8dp"
                 android:text="@string/plotSynopsis"
                 android:textSize="18sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimaryDark"/>
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="150dp">
@@ -146,7 +147,8 @@
         android:paddingBottom="4dp"
         android:text="@string/videosLabel"
         android:textSize="16sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimaryDark"/>
 
     <ListView
         android:layout_width="wrap_content"
