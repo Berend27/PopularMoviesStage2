@@ -32,19 +32,22 @@ import org.w3c.dom.Text;
 import java.net.URL;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 public class DetailsActivity extends AppCompatActivity {
 
-    TextView title;
-    TextView date;
-    ImageView poster;
-    TextView average;
-    TextView overview;
-    TextView videosLabel;
+    @BindView(R.id.title) TextView title;
+    @BindView(R.id.release_date) TextView date;
+    @BindView(R.id.posterPic) ImageView poster;
+    @BindView(R.id.voter_average) TextView average;
+    @BindView(R.id.synopsis) TextView overview;
+    @BindView(R.id.trailers_label) TextView videosLabel;
 
-    Trailer[] trailers;
+    protected Trailer[] trailers;
 
-    FetchTrailersTask fetch = new FetchTrailersTask();
+    protected FetchTrailersTask fetch = new FetchTrailersTask();
 
     private static final String TAG = DetailsActivity.class.getSimpleName();
 
@@ -62,7 +65,7 @@ public class DetailsActivity extends AppCompatActivity {
     boolean doneLoading = false;
     boolean alreadyFavored = false;
 
-    Button favoritesButton;
+    protected Button favoritesButton;
 
     private Context context = this;
 
@@ -72,6 +75,7 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.movie_details);
+        ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detailsToolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -84,19 +88,14 @@ public class DetailsActivity extends AppCompatActivity {
 
         details = JsonUtils.getDetails(json, place);
 
-        title = (TextView) findViewById(R.id.title);
         title.setText(details[0]);
 
-        date = (TextView) findViewById(R.id.release_date);
         date.setText(details[1]);
 
-        poster = (ImageView) findViewById(R.id.posterPic);
         Picasso.get().load(details[2]).into(poster);
 
-        average = (TextView) findViewById(R.id.voter_average);
         average.setText(details[3]);
 
-        overview = (TextView) findViewById(R.id.synopsis);
         overview.setText(details[4]);
 
         movieId = details[5];
@@ -270,8 +269,3 @@ public class DetailsActivity extends AppCompatActivity {
     */
 }
 
-/*
-        String chooserTitle = "Select an app to watch the video in";
-        Intent chosenIntent = Intent.createChooser(trailerIntent, chooserTitle);
-        startActivity(chosenIntent);
- */

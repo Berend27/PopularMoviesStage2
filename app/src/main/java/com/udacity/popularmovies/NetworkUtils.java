@@ -11,7 +11,10 @@ import java.util.Scanner;
 
 import static android.content.ContentValues.TAG;
 
-public class NetworkUtils {
+public final class NetworkUtils {
+
+    // Preventing an instantiation with a private constructor
+    private NetworkUtils() { }
 
     public static URL createURL (String urlString)
     {

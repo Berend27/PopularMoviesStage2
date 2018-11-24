@@ -9,7 +9,10 @@ import org.json.JSONObject;
 
 import static android.content.ContentValues.TAG;
 
-public class JsonUtils {
+public final class JsonUtils {
+
+    private JsonUtils() {}
+
     public static String[] getPoster(String json)
     {
         try {
