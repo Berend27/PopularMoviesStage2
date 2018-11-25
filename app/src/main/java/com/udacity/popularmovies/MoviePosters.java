@@ -1,7 +1,10 @@
 package com.udacity.popularmovies;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -15,9 +18,11 @@ import android.widget.Spinner;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
-import static android.content.ContentValues.TAG;
+import com.udacity.popularmovies.database.FavoritesDatabase;
+import com.udacity.popularmovies.database.FavoritesEntry;
 
 import java.net.URL;
+import java.util.List;
 
 public class MoviePosters extends AppCompatActivity
         implements AdapterView.OnItemSelectedListener, PosterAdapter.PosterItemClickListener {
@@ -25,6 +30,13 @@ public class MoviePosters extends AppCompatActivity
     private static final int NUM_LIST_ITEMS = 20;
     private static final int NUM_COLUMNS = 2;
 
+    private final String OPTION = "option";
+    private final String FAVORITES_SELECTED = "favoritesSelected";
+
+    private static final String TAG = MoviePosters.class.getSimpleName();
+
+    private FavoritesAdapter favoritesAdapter;
+    private FavoritesDatabase favoritesDb;
     private PosterAdapter mAdapter;
     private RecyclerView mPosterGrid;
 
@@ -32,6 +44,8 @@ public class MoviePosters extends AppCompatActivity
     private int beforeFavorites = 0;    // the selected option before "Favorites" was selected
 
     public boolean started = false;
+    private boolean startedFavorites = false;
+    private boolean favoritesSelected = false;
 
     static final String POPULAR = "http://api.themoviedb.org/3/movie/popular?api_key=";
     static final String TOP_RATED = "http://api.themoviedb.org/3/movie/top_rated?api_key=";
@@ -50,21 +64,20 @@ public class MoviePosters extends AppCompatActivity
 
     Spinner sort;
 
-    boolean favoritesSelected = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movie_posters);
-        state = savedInstanceState;
         if (savedInstanceState != null)
         {
-            option = savedInstanceState.getInt("option");
+            option = savedInstanceState.getInt(OPTION);
+            favoritesSelected = savedInstanceState.getBoolean(FAVORITES_SELECTED);
         }
+        setContentView(R.layout.activity_movie_posters);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.posterToolbar);
         setSupportActionBar(toolbar);
-
-        spinningDialog = (ProgressBar) findViewById(R.id.spinning_progress);
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.sortBy,
@@ -75,10 +88,10 @@ public class MoviePosters extends AppCompatActivity
         sort = (Spinner) findViewById(R.id.sort);
         sort.setAdapter(adapter);
 
-        sort.setSelection(beforeFavorites);
         // setting the listener
         sort.setOnItemSelectedListener(this);
 
+        spinningDialog = (ProgressBar) findViewById(R.id.spinning_progress);
 
         mPosterGrid = (RecyclerView) findViewById(R.id.rv_posters);
 
@@ -92,27 +105,50 @@ public class MoviePosters extends AppCompatActivity
          */
         mPosterGrid.setHasFixedSize(true);
 
-        fetch.execute(query);
-
         mAdapter = new PosterAdapter(NUM_LIST_ITEMS, this);
+
+        // Adapter for if Favorites is selected
+        favoritesAdapter = new FavoritesAdapter(this, this);
+        // Database that stores the favored movies
+        favoritesDb = FavoritesDatabase.getInstance(getApplicationContext());
+
+        if (favoritesSelected)
+        {
+            spinningDialog.setVisibility(View.GONE);
+            setupViewModel();
+        }
+        else
+        {
+            fetch.execute(query);
+        }
 
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState)
+    protected void onSaveInstanceState(Bundle savedInstanceState)
     {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putInt("option", option);
+        savedInstanceState.putInt(OPTION, option);
+        savedInstanceState.putBoolean(FAVORITES_SELECTED, favoritesSelected);
     }
 
     @Override
     public void onListItemClicked(int clickedItemIndex) {
 
-        Intent intent = new Intent(this, DetailsActivity.class);
-        intent.putExtra("key", "http://image.tmdb.org/t/p/w185//3IGbjc5ZC5yxim5W0sFING2kdcz.jpg");
-        intent.putExtra("json", mAdapter.getJson());
-        intent.putExtra("place", clickedItemIndex);
-        startActivity(intent);
+        if (favoritesSelected)
+        {
+            String[] details = favoritesAdapter.getMovie(clickedItemIndex);
+            Intent intent = new Intent(this, FavoredDetails.class);
+            intent.putExtra(FavoredDetails.FAVORED_DETAILS_KEY, details);
+            startActivity(intent);
+        }
+        else {
+            Intent intent = new Intent(this, DetailsActivity.class);
+            intent.putExtra("key", "http://image.tmdb.org/t/p/w185//3IGbjc5ZC5yxim5W0sFING2kdcz.jpg");
+            intent.putExtra("json", mAdapter.getJson());
+            intent.putExtra("place", clickedItemIndex);
+            startActivity(intent);
+        }
 
     }
 
@@ -125,28 +161,23 @@ public class MoviePosters extends AppCompatActivity
 
         String selection = parent.getItemAtPosition(pos).toString();
         option = pos;
-        if (!favoritesSelected)    // done to prevent an irrelevant toast
-            Toast.makeText(parent.getContext(), selection, Toast.LENGTH_LONG).show();
+        Toast.makeText(parent.getContext(), selection, Toast.LENGTH_LONG).show();
         if (selection.equals("Most Popular")) {
             query = POPULAR + API_KEY;
-            beforeFavorites = option;
             favoritesSelected = false;
+            new FetchMoviesTask().execute(query);
         }
         else if (selection.equals("Top Rated")) {
             query = TOP_RATED + API_KEY;
-            beforeFavorites = option;
             favoritesSelected = false;
+            new FetchMoviesTask().execute(query);
         }
         else if (selection.equals("Favorites"))
         {
-            Intent favoritesIntent = new Intent(this, FavoritesActivity.class);
             favoritesSelected = true;
-            // Make sure that the option isn't still "Favorites" after navigating back
-            option = beforeFavorites;
-            sort.setSelection(option);
-            startActivity(favoritesIntent);
+            setupViewModel();
         }
-        new FetchMoviesTask().execute(query);
+
 
     }
 
@@ -156,6 +187,23 @@ public class MoviePosters extends AppCompatActivity
         // nothing
     }
 
+    private void setupViewModel()
+    {
+        // Instantiate the ViewModel and observe the LiveData from it
+        FavoritesViewModel viewModel = ViewModelProviders.of(this).get(FavoritesViewModel.class);
+        viewModel.getFavorites().observe(this, new Observer<List<FavoritesEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<FavoritesEntry> favoritesEntries) {
+                Log.d(TAG, "Receiving a database update from LiveData with a ViewModel");
+                favoritesAdapter.setFavorites(favoritesEntries);
+
+                if (favoritesSelected == true)
+                {
+                    mPosterGrid.setAdapter(favoritesAdapter);
+                }
+            }
+        });
+    }
 
     public class FetchMoviesTask extends AsyncTask<String, Integer, String>
     {
@@ -180,7 +228,7 @@ public class MoviePosters extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            if (!started)
+            if (!started && !favoritesSelected)
                 spinningDialog.setVisibility(spinningDialog.VISIBLE);
         }
 
@@ -196,10 +244,10 @@ public class MoviePosters extends AppCompatActivity
                 String json = jsonString;
                 mAdapter.setJson(json);
                 mAdapter.setPosters();
+                mPosterGrid.setAdapter(mAdapter);
 
                 if (started == false)
                 {
-                    mPosterGrid.setAdapter(mAdapter);
                     started = true;
                 }
 

@@ -69,13 +69,6 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.PosterView
     @Override
     public int getItemCount() { return mNumberItems; }
 
-    public void selectCriteria(String option)
-    {
-        json = option;
-        notifyDataSetChanged();
-        setPosters();
-    }
-
     // getter method
     String getJson()
     {
@@ -97,10 +90,6 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.PosterView
         void bind(String imageAddress) {
             Picasso.get().load(imageAddress).error(R.mipmap.ic_launcher).into(gridItemPosterView);
 
-            /*
-            int picture = R.drawable.peanut_day;
-            gridItemPosterView.setImageResource(picture);
-            */
         }
 
         @Override
